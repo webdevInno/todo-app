@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SonPlan - Gestionnaire de Tâches</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rose: #9b1d5a;
+            --rose-light: #c2185b;
+            --rose-pale: #f8e8f0;
+            --white: #ffffff;
+            --grey-soft: #f9f3f6;
+            --grey-text: #6b4a5c;
+            --dark: #2d0a1a;
+            --shadow: 0 8px 32px rgba(155,29,90,0.15);
+            --shadow-sm: 0 2px 12px rgba(155,29,90,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--grey-soft); color: var(--dark); min-height: 100vh; }
+
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, var(--rose) 0%, #6a0f3a 100%);
+            padding: 0 36px; height: 70px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(155,29,90,0.4);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo-box { display: flex; align-items: center; gap: 12px; }
+        .logo-name { display: block; font-family: 'Playfair Display', serif; font-size: 1.5rem; color: white; letter-spacing: 0.5px; line-height: 1.1; }
+        .logo-tagline { display: block; font-size: 0.72rem; color: rgba(255,255,255,0.7); font-weight: 300; letter-spacing: 0.3px; }
+
+        .navbar-center { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .greeting-text { color: white !important; font-size: 0.95rem; font-weight: 400; }
+        .greeting-text strong { font-weight: 700; color: white; }
+        .greeting-date { color: rgba(255,255,255,0.7) !important; font-size: 0.75rem; text-transform: capitalize; }
+
+        .navbar-right { display: flex; align-items: center; gap: 18px; }
+        .clock {
+            color: white !important;
+            font-size: 0.95rem; font-weight: 500;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 14px; border-radius: 20px;
+            letter-spacing: 0.5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* STATS BAR */
+        .stats-bar {
+            background: white; display: flex; align-items: center;
+            justify-content: center; padding: 14px 0;
+            box-shadow: 0 2px 8px rgba(155,29,90,0.08);
+            border-bottom: 1px solid #f0dce8;
+        }
+        .stat-item { display: flex; align-items: center; gap: 8px; padding: 0 32px; }
+        .stat-icon { font-size: 1.1rem; }
+        .stat-number { font-size: 1.4rem; font-weight: 700; color: var(--rose); }
+        .stat-label { font-size: 0.8rem; color: var(--grey-text); font-weight: 400; }
+        .stat-divider { width: 1px; height: 30px; background: #e8d0dc; }
+
+        /* HERO */
+        .hero { position: relative; height: 280px; overflow: hidden; }
+        .hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center 60%; filter: brightness(0.55) saturate(0.9); }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(155,29,90,0.7) 0%, rgba(106,15,58,0.3) 60%, transparent 100%); }
+        .hero-text { position: absolute; top: 50%; left: 60px; transform: translateY(-50%); color: white; }
+        .hero-text h2 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; line-height: 1.2; margin-bottom: 10px; text-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+        .hero-text p { font-size: 0.95rem; color: rgba(255,255,255,0.88); font-weight: 300; max-width: 380px; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(45,10,26,0.55); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-card {
+            background: white; border-radius: 20px; padding: 32px;
+            width: 100%; max-width: 480px;
+            box-shadow: 0 20px 60px rgba(155,29,90,0.25);
+            animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .modal-header h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--rose); }
+        .modal-close { background: var(--grey-soft); border: none; border-radius: 8px; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; color: var(--grey-text); display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .modal-close:hover { background: #f0dce8; color: var(--rose); }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+        /* FORM */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--grey-text); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .form-group input, .select-statut {
+            width: 100%; padding: 12px 16px; border: 1.5px solid #e8d0dc;
+            border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+            color: var(--dark); background: var(--grey-soft); outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .select-statut:focus { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(155,29,90,0.12); background: white; }
+        .select-statut { cursor: pointer; appearance: auto; }
+
+        /* BOUTONS */
+        .btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: transform 0.15s, filter 0.15s; }
+        .btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+        .btn:active { transform: translateY(0); }
+        .btn-primary { background: linear-gradient(135deg, var(--rose), var(--rose-light)); color: white; box-shadow: 0 4px 14px rgba(155,29,90,0.35); }
+        .btn-outline { background: white; color: var(--rose); border: 1.5px solid var(--rose); }
+        .btn-success { background: #2e7d32; color: white; box-shadow: 0 4px 12px rgba(46,125,50,0.3); }
+        .btn-warning { background: #e65100; color: white; box-shadow: 0 4px 12px rgba(230,81,0,0.3); }
+        .btn-danger { background: #b71c1c; color: white; box-shadow: 0 4px 12px rgba(183,28,28,0.3); }
+
+        /* CONTAINER */
+        .container { max-width: 820px; margin: 0 auto; padding: 36px 20px; }
+
+        /* LISTE */
+        .liste-header h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--dark); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+        /* CARD */
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid rgba(155,29,90,0.08); margin-bottom: 16px; transition: box-shadow 0.2s, transform 0.2s; }
+        .card:hover { box-shadow: var(--shadow); }
+
+        .tache { border-left: 4px solid var(--rose); }
+        .tache:hover { transform: translateX(4px); }
+        .tache.terminee { border-left-color: #2e7d32; opacity: 0.75; }
+
+        .tache-content { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .tache-info { flex: 1; }
+        .tache-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+        .tache-header h3 { font-size: 1rem; font-weight: 600; color: var(--dark); }
+        .tache-info p { color: var(--grey-text); font-size: 0.875rem; margin-bottom: 6px; }
+        .tache-info small { color: #b0819a; font-size: 0.78rem; }
+        .tache-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* BADGE */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-warning { background: #fff3e0; color: #e65100; }
+        .badge-success { background: #e8f5e9; color: #2e7d32; }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 60px 20px; background: white; border-radius: 16px; border: 2px dashed #e8d0dc; margin-bottom: 20px; }
+        .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+        .empty-state h3 { color: var(--grey-text); font-size: 1.1rem; margin-bottom: 6px; }
+        .empty-state p { color: #b0819a; font-size: 0.875rem; }
+
+        /* FOOTER */
+        .footer { text-align: center; padding: 24px; color: #b0819a; font-size: 0.82rem; border-top: 1px solid #f0dce8; }
+
+        /* NOTIFICATION */
+        .notification { position: fixed; top: 20px; right: 20px; padding: 14px 22px; border-radius: 12px; font-weight: 500; font-size: 0.9rem; z-index: 2000; box-shadow: var(--shadow); color: white; animation: slideIn 0.3s ease; }
+        .notification.success { background: var(--rose); }
+        .notification.error { background: #c62828; }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        @media (max-width: 700px) {
+            .navbar { padding: 0 16px; }
+            .navbar-center { display: none; }
+            .hero-text { left: 24px; }
+            .hero-text h2 { font-size: 1.5rem; }
+            .tache-content { flex-direction: column; align-items: flex-start; }
+            .modal-card { margin: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <div class="logo-box">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+            <rect width="38" height="38" rx="10" fill="white" fill-opacity="0.2"/>
+            <path d="M9 12h20M9 19h20M9 26h12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="29" cy="26" r="5" fill="#f48fb1"/>
+            <path d="M26.5 26l1.5 1.5 3-3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+            <span class="logo-name">SonPlan</span>
+            <span class="logo-tagline">Gestionnaire de tâches</span>
+        </div>
+    </div>
+    <div class="navbar-center">
+        <span class="greeting-text" id="greeting">☀️ Bonjour, <strong>Sonia</strong> 👋</span>
+        <span class="greeting-date" id="greeting-date"></span>
+    </div>
+    <div class="navbar-right">
+        <div class="clock" id="clock">🕐 --:--:--</div>
+        <button class="btn btn-primary navbar-btn"
+                onclick="document.getElementById('modal').classList.remove('hidden')">
+            ➕ Nouvelle tâche
+        </button>
+    </div>
+</header>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <span class="stat-icon">📋</span>
+        <span class="stat-number" th:text="${taches.size()}">0</span>
+        <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+        <span class="stat-icon">🔄</span>
+        <span class="stat-number" th:text="${enCours}">0</span>
+        <span class="stat-label">En cours</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+        <span class="stat-icon">✅</span>
+        <span class="stat-number" th:text="${termine}">0</span>
+        <span class="stat-label">Terminées</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+        <span class="stat-icon">📊</span>
+        <span class="stat-number"
+              th:text="${taches.size() > 0} ? ${#numbers.formatInteger(termine * 100 / taches.size(), 1)} + '%' : '0%'">0%</span>
+        <span class="stat-label">Complété</span>
+    </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400&q=80"
+         alt="Espace de travail" class="hero-img"/>
+    <div class="hero-overlay"></div>
+    <div class="hero-text">
+        <h2>Bienvenue sur<br/>votre espace de travail</h2>
+        <p>Organisez, priorisez et accomplissez vos tâches au quotidien.</p>
+    </div>
+</div>
+
+<!-- MODAL AJOUT -->
+<div id="modal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>✨ Nouvelle Tâche</h2>
+            <button class="modal-close"
+                    onclick="document.getElementById('modal').classList.add('hidden')">✕</button>
+        </div>
+        <form th:action="@{/taches/ajouter}" th:object="${nouvelleTache}" method="post">
+            <div class="form-group">
+                <label>Titre *</label>
+                <input type="text" th:field="*{titre}"
+                       placeholder="Ex: Préparer le rapport mensuel" required/>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" th:field="*{description}"
+                       placeholder="Ex: Envoyer avant vendredi"/>
+            </div>
+            <div class="form-group">
+                <label>Statut</label>
+                <select th:field="*{statut}" class="select-statut">
+                    <option value="EN_COURS">🔄 En cours</option>
+                    <option value="TERMINE">✅ Terminé</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline"
+                        onclick="document.getElementById('modal').classList.add('hidden')">Annuler</button>
+                <button type="submit" class="btn btn-primary">➕ Ajouter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- LISTE -->
+<div class="container">
+    <div class="liste-header">
+        <h2>📝 Mes Tâches (<span th:text="${taches.size()}">0</span>)</h2>
+    </div>
+
+    <div th:if="${taches.empty}" class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>Aucune tâche pour le moment</h3>
+        <p>Cliquez sur <strong>Nouvelle tâche</strong> pour commencer !</p>
+    </div>
+
+    <div th:unless="${taches.empty}">
+        <div th:each="tache : ${taches}"
+             th:class="${tache.statut == 'TERMINE'} ? 'card tache terminee' : 'card tache'">
+            <div class="tache-content">
+                <div class="tache-info">
+                    <div class="tache-header">
+                        <h3 th:text="${tache.titre}">Titre</h3>
+                        <span th:if="${tache.statut == 'EN_COURS'}" class="badge badge-warning">🔄 En cours</span>
+                        <span th:if="${tache.statut == 'TERMINE'}" class="badge badge-success">✅ Terminé</span>
+                    </div>
+                    <p th:text="${tache.description}"></p>
+                    <small th:text="'🔖 ID : #' + ${tache.id}"></small>
+                </div>
+                <div class="tache-actions">
+                    <a th:if="${tache.statut != 'TERMINE'}"
+                       th:href="@{/taches/terminer/{id}(id=${tache.id})}"
+                       class="btn btn-success">✓ Terminer</a>
+                    <a th:href="@{/taches/modifier/{id}(id=${tache.id})}"
+                       class="btn btn-warning">✏️ Modifier</a>
+                    <a th:href="@{/taches/supprimer/{id}(id=${tache.id})}"
+                       class="btn btn-danger"
+                       onclick="return confirm('Voulez-vous vraiment supprimer cette tâche ?')">
+                        🗑️ Supprimer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>© 2026 SonPlan — Développé avec ❤️ Spring Boot & Thymeleaf</p>
+</footer>
+
+<!-- SCRIPT -->
+<script>
+    function updateClock() {
+        const now = new Date();
+        const h = now.getHours();
+        let greeting = '';
+        if (h >= 5 && h < 12) greeting = '☀️ Bonjour';
+        else if (h >= 12 && h < 18) greeting = '🌤️ Bon après-midi';
+        else if (h >= 18 && h < 22) greeting = '🌆 Bonsoir';
+        else greeting = '🌙 Bonne nuit';
+
+        document.getElementById('greeting').innerHTML = greeting + ', <strong>Sonia</strong> 👋';
+        document.getElementById('clock').textContent = '🕐 ' + now.toLocaleTimeString('fr-FR', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+        document.getElementById('greeting-date').textContent = now.toLocaleDateString('fr-FR', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+</script>
+
+</body>
+</html>
