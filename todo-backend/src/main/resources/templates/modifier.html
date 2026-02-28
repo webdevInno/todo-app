@@ -16,7 +16,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DM Sans', sans-serif; background: var(--grey-soft); color: var(--dark); min-height: 100vh; }
 
-        /* NAVBAR */
         .navbar {
             background: linear-gradient(135deg, var(--rose) 0%, #6a0f3a 100%);
             padding: 0 36px; height: 70px;
@@ -27,56 +26,30 @@
         .logo-name { display: block; font-family: 'Playfair Display', serif; font-size: 1.5rem; color: white; }
         .logo-tagline { display: block; font-size: 0.72rem; color: rgba(255,255,255,0.7); font-weight: 300; }
 
-        /* CONTAINER */
         .container { max-width: 560px; margin: 50px auto; padding: 0 20px; }
 
-        /* CARD */
         .card {
             background: white; border-radius: 20px; padding: 36px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(155,29,90,0.08);
+            box-shadow: var(--shadow); border: 1px solid rgba(155,29,90,0.08);
         }
-
         .card-header {
             display: flex; align-items: center; gap: 10px;
-            margin-bottom: 28px;
-            padding-bottom: 16px;
+            margin-bottom: 28px; padding-bottom: 16px;
             border-bottom: 1.5px solid #f0dce8;
         }
-        .card-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem; color: var(--rose);
-        }
+        .card-header h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--rose); }
 
-        /* FORM */
         .form-group { margin-bottom: 18px; }
-        .form-group label {
-            display: block; font-size: 0.82rem; font-weight: 600;
-            color: var(--grey-text); text-transform: uppercase;
-            letter-spacing: 0.5px; margin-bottom: 7px;
-        }
+        .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--grey-text); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
         .form-group input, .select-statut {
-            width: 100%; padding: 13px 16px;
-            border: 1.5px solid #e8d0dc; border-radius: 10px;
-            font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
-            color: var(--dark); background: var(--grey-soft); outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%; padding: 13px 16px; border: 1.5px solid #e8d0dc; border-radius: 10px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--dark);
+            background: var(--grey-soft); outline: none; transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .form-group input:focus, .select-statut:focus {
-            border-color: var(--rose);
-            box-shadow: 0 0 0 3px rgba(155,29,90,0.12);
-            background: white;
-        }
+        .form-group input:focus, .select-statut:focus { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(155,29,90,0.12); background: white; }
         .select-statut { cursor: pointer; }
 
-        /* BOUTONS */
-        .btn {
-            display: inline-flex; align-items: center; gap: 7px;
-            padding: 12px 22px; border: none; border-radius: 10px;
-            font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
-            cursor: pointer; text-decoration: none;
-            transition: transform 0.15s, filter 0.15s;
-        }
+        .btn { display: inline-flex; align-items: center; gap: 7px; padding: 12px 22px; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: transform 0.15s, filter 0.15s; }
         .btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
         .btn-primary { background: linear-gradient(135deg, var(--rose), var(--rose-light)); color: white; box-shadow: 0 4px 14px rgba(155,29,90,0.35); }
         .btn-outline { background: white; color: var(--rose); border: 1.5px solid var(--rose); }
@@ -84,13 +57,11 @@
         .form-actions { display: flex; gap: 12px; margin-top: 28px; }
         .form-actions .btn { flex: 1; justify-content: center; }
 
-        /* FOOTER */
         .footer { text-align: center; padding: 30px; color: #b0819a; font-size: 0.82rem; }
     </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <header class="navbar">
     <a class="logo-box" href="/taches">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
@@ -106,28 +77,21 @@
     </a>
 </header>
 
-<!-- CONTAINER -->
 <div class="container">
     <div class="card">
         <div class="card-header">
             <h2>✏️ Modifier la Tâche</h2>
         </div>
-
         <form th:action="@{/taches/modifier/{id}(id=${tache.id})}"
               th:object="${tache}" method="post">
-
             <div class="form-group">
                 <label>Titre *</label>
-                <input type="text" th:field="*{titre}"
-                       placeholder="Titre de la tâche" required/>
+                <input type="text" th:field="*{titre}" placeholder="Titre de la tâche" required/>
             </div>
-
             <div class="form-group">
                 <label>Description</label>
-                <input type="text" th:field="*{description}"
-                       placeholder="Description optionnelle"/>
+                <input type="text" th:field="*{description}" placeholder="Description optionnelle"/>
             </div>
-
             <div class="form-group">
                 <label>Statut</label>
                 <select th:field="*{statut}" class="select-statut">
@@ -135,7 +99,6 @@
                     <option value="TERMINE">✅ Terminé</option>
                 </select>
             </div>
-
             <div class="form-actions">
                 <a href="/taches" class="btn btn-outline">❌ Annuler</a>
                 <button type="submit" class="btn btn-primary">💾 Sauvegarder</button>
