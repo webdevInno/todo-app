@@ -1,7 +1,7 @@
 package com.todoapp.todo_backend.controller;
 
 import com.todoapp.todo_backend.dto.TacheDTO;
-import com.todoapp.todo_backend.service.TacheService;
+import com.todoapp.todo_backend.service.ITacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TacheController {
 
-    private final TacheService tacheService;
+    private final ITacheService tacheService;
 
     // GET - Lister toutes les tâches
     @GetMapping

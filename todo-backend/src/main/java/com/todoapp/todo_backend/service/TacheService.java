@@ -11,25 +11,26 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class TacheService {
+public class TacheService implements ITacheService {
 
     private final TacheRepository tacheRepository;
 
-    // Lister toutes les tâches
+    @Override
     public List<TacheDTO> getAllTaches() {
         return tacheRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-    // Récupérer une tâche par id
+
+    @Override
     public TacheDTO getTacheById(Long id) {
         Tache tache = tacheRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tâche non trouvée"));
         return convertToDTO(tache);
     }
 
-    // Ajouter une tâche
+    @Override
     public TacheDTO createTache(TacheDTO dto) {
         Tache tache = new Tache();
         tache.setTitre(dto.getTitre());
@@ -38,7 +39,7 @@ public class TacheService {
         return convertToDTO(tacheRepository.save(tache));
     }
 
-    // Modifier une tâche
+    @Override
     public TacheDTO updateTache(Long id, TacheDTO dto) {
         Tache tache = tacheRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tâche non trouvée"));
@@ -48,12 +49,12 @@ public class TacheService {
         return convertToDTO(tacheRepository.save(tache));
     }
 
-    // Supprimer une tâche
+    @Override
     public void deleteTache(Long id) {
         tacheRepository.deleteById(id);
     }
 
-    // Marquer une tâche comme terminée
+    @Override
     public TacheDTO marquerTerminee(Long id) {
         Tache tache = tacheRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tâche non trouvée"));
@@ -61,7 +62,6 @@ public class TacheService {
         return convertToDTO(tacheRepository.save(tache));
     }
 
-    // Convertir Tache en TacheDTO
     private TacheDTO convertToDTO(Tache tache) {
         TacheDTO dto = new TacheDTO();
         dto.setId(tache.getId());

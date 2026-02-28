@@ -1,7 +1,7 @@
 package com.todoapp.todo_backend.controller;
 
 import com.todoapp.todo_backend.dto.TacheDTO;
-import com.todoapp.todo_backend.service.TacheService;
+import com.todoapp.todo_backend.service.ITacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TacheViewController {
 
-    private final TacheService tacheService;
+    private final ITacheService tacheService;
 
     @GetMapping
     public String index(Model model) {
